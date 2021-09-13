@@ -1,33 +1,33 @@
-# coding=utf-8
 from bs4 import BeautifulSoup
 import requests
+import pandas
 
-allDateInfo = []
-allResultInfo = []
+def hadleDate(soup):
+    cleanDate = []
+    filterDate = soup.find_all('td',attrs={'style':'font-size: 6vmin; font-weight: bold; color: #000000;border-bottom-style: dotted; border-bottom'})
+    for i in filterDate:
+        x = i.text
+        x = x[:10]
+        cleanDate.append(x)
+    return cleanDate
 
-def getLottery(date,result,url):
-    r = requests.get(url) 
-    isConnected = int(r.status_code) # 檢查status code是否為200
-    temp = []
-    if (isConnected==200):
-        soup = BeautifulSoup(r.text, 'html.parser') # 抓取html
-        filterDate = soup.find_all('td', attrs={'style':'font-size: 4vmin; font-weight: bold; color: #000000;border-bottom-style: dotted; border-bottom-color: #CCCCCC;text-align:center;padding:0px;vertical-align:middle'})
-        filterNumb = soup.find_all('td', attrs={'style':'font-size: 6vmin; font-weight: bold; color: #000000;border-bottom-style: dotted; border-bottom-color: #CCCCCC;text-align:center;padding:0px;vertical-align:middle'})
-        for i,j in zip(filterDate,filterNumb):
-            x = i.text.strip()
-            y = j.text.strip() # strip() 可以去除頭尾的空白鍵
-            date.append(x)
-            temp.append(y)
-        for i in temp:
-            x = "".join(i.split())
-            # print(x)
-            result.append(x)
+def hadleLottoNumber(soup):
+    cleanLottoNumber = []
+    filterNumber = soup.find_all('td',attrs={'style':'font-size: 6vmin; font-weight: bold; color: #000000;border-bottom-style: dotted; border-bottom-color: #CCCCCC;text-align:center;padding:0px;vertical-align:middle'})
+    for i in filterNumber:
+        x = "".join((i.text.strip()).split()) 
+        cleanLottoNumber.append(x)
+    return cleanLottoNumber
 
-def getPagesInfo(date,result,num):
-    for i in range (num):
-        url = 'https://www.pilio.idv.tw/lto539/list.asp?indexpage=%s&orderby=new'%(191-num)
-        getLottery(date, result, url)
-    
-    return date, result
-allDateInfo,allResultInfo = getPagesInfo(allDateInfo,allResultInfo,10)
-print(allDateInfo, allResultInfo)
+def getPageData(webURL):
+    date = []
+    lottoNumber = []
+    r = requests.get(url=webURL)
+    checkStatusCode = int(r.status_code)
+
+    if checkStatusCode==200:
+        soup = BeautifulSoup(r.text, 'html.parser')
+        date += hadleDate(soup)
+        lottoNumber += hadleLottoNumber(soup)
+
+    return date,lottoNumber
