@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 import requests
 import pandas
 
+page = 100
 def hadleDate(soup):
     cleanDate = []
     filterDate = soup.find_all('td',attrs={'style':'font-size: 4vmin; font-weight: bold; color: #000000;border-bottom-style: dotted; border-bottom-color: #CCCCCC;text-align:center;padding:0px;vertical-align:middle'})
@@ -18,7 +19,7 @@ def hadleLottoNumber(soup):
     for i in filterNumber:
         x = "".join((i.text.strip()).split()) 
         cleanLottoNumber.append(x)
-    cleanLottoNumber.append(x)
+    cleanLottoNumber.reverse()
     return cleanLottoNumber
 
 def getPageData(webURL):
@@ -35,14 +36,18 @@ def getPageData(webURL):
     return date,lottoNumber
 
 def getMorePages(num):
-    allPageDate = []
-    allPageLottoNumber = []
+    tempAllPageDate = []
+    tempAllPageLottoNumber = []
 
     for i in range (num):
         pageURL = f'https://www.pilio.idv.tw/lto539/list.asp?indexpage={191-i}&orderby=new'
-        allPageDate += getPageData(webURL=pageURL)[0]
-        allPageLottoNumber += getPageData(webURL=pageURL)[1]
+        tempAllPageDate += getPageData(webURL=pageURL)[0]
+        tempAllPageLottoNumber += getPageData(webURL=pageURL)[1]
+        print(f'It is now page Number {i+1}.')
 
-    return allPageDate, allPageLottoNumber
+    return tempAllPageDate, tempAllPageLottoNumber
 
-getMorePages(5)
+allPageDate, allPageLottoNumber = getMorePages(page)
+dict = {'date': allPageDate,'lottoNumber':allPageLottoNumber}
+dataFrame = pandas.DataFrame(dict)
+dataFrame.to_csv('output.csv')
